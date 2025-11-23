@@ -3,11 +3,11 @@
 
 #define MAX_CLIENTS 10
 
-// Á¢¼ÓÀÚ °ü¸®¸¦ À§ÇÑ °£´ÜÇÑ ¹è¿­
+// ì ‘ì†ì ê´€ë¦¬ë¥¼ ìœ„í•œ ê°„ë‹¨í•œ ë°°ì—´
 pid_t client_pids[MAX_CLIENTS];
 int client_count = 0;
 
-// Å¬¶óÀÌ¾ğÆ® Ãß°¡
+// í´ë¼ì´ì–¸íŠ¸ ì¶”ê°€
 void add_client(pid_t pid) {
     if (client_count < MAX_CLIENTS) {
         client_pids[client_count++] = pid;
@@ -17,11 +17,11 @@ void add_client(pid_t pid) {
     }
 }
 
-// Å¬¶óÀÌ¾ğÆ® Á¦°Å
+// í´ë¼ì´ì–¸íŠ¸ ì œê±°
 void remove_client(pid_t pid) {
     for (int i = 0; i < client_count; i++) {
         if (client_pids[i] == pid) {
-            // µÚ¿¡ ÀÖ´Â ¿ä¼ÒµéÀ» ¾ÕÀ¸·Î ´ç±è
+            // ë’¤ì— ìˆëŠ” ìš”ì†Œë“¤ì„ ì•ìœ¼ë¡œ ë‹¹ê¹€
             for (int j = i; j < client_count - 1; j++) {
                 client_pids[j] = client_pids[j+1];
             }
@@ -32,18 +32,18 @@ void remove_client(pid_t pid) {
     }
 }
 
-// ¸Ş½ÃÁö ºê·ÎµåÄ³½ºÆ® (¸ğµç Å¬¶óÀÌ¾ğÆ®¿¡°Ô Àü¼Û)
+// ë©”ì‹œì§€ ë¸Œë¡œë“œìºìŠ¤íŠ¸ (ëª¨ë“  í´ë¼ì´ì–¸íŠ¸ì—ê²Œ ì „ì†¡)
 void broadcast_message(Message msg) {
     char client_fifo[64];
     int fd;
 
     for (int i = 0; i < client_count; i++) {
-        // º¸³½ º»ÀÎ¿¡°Ô´Â ´Ù½Ã º¸³»Áö ¾ÊÀ½ (¼±ÅÃ »çÇ×)
+        // ë³´ë‚¸ ë³¸ì¸ì—ê²ŒëŠ” ë‹¤ì‹œ ë³´ë‚´ì§€ ì•ŠìŒ (ì„ íƒ ì‚¬í•­)
         if (client_pids[i] == msg.pid) continue;
 
         sprintf(client_fifo, CLIENT_FIFO_TEMPLATE, client_pids[i]);
         
-        // Non-blockingÀ¸·Î ¿­¾î¼­ Å¬¶óÀÌ¾ğÆ®°¡ Á×¾úÀ» ¶§ ¸ØÃßÁö ¾Ê°Ô ÇÔ
+        // Non-blockingìœ¼ë¡œ ì—´ì–´ì„œ í´ë¼ì´ì–¸íŠ¸ê°€ ì£½ì—ˆì„ ë•Œ ë©ˆì¶”ì§€ ì•Šê²Œ í•¨
         if ((fd = open(client_fifo, O_WRONLY | O_NONBLOCK)) != -1) {
             write(fd, &msg, sizeof(Message));
             close(fd);
@@ -51,7 +51,7 @@ void broadcast_message(Message msg) {
     }
 }
 
-// ¼­¹ö Á¾·á ½Ã±×³Î ÇÚµé·¯
+// ì„œë²„ ì¢…ë£Œ ì‹œê·¸ë„ í•¸ë“¤ëŸ¬
 void server_sigint_handler(int signo) {
     printf("\n[Server] Shutting down... Removing FIFO.\n");
     unlink(PUBLIC_FIFO);
@@ -62,30 +62,30 @@ int main() {
     int public_fd;
     Message msg;
 
-    // ¼­¹ö Àü¿ë ½Ã±×³Î ÇÚµé·¯ µî·Ï
+    // ì„œë²„ ì „ìš© ì‹œê·¸ë„ í•¸ë“¤ëŸ¬ ë“±ë¡
     signal(SIGINT, server_sigint_handler);
 
-    // 1. °ø¿ë FIFO »ı¼º
+    // 1. ê³µìš© FIFO ìƒì„±
     if (mkfifo(PUBLIC_FIFO, 0666) == -1) {
-        // ÀÌ¹Ì Á¸ÀçÇÒ ¼ö ÀÖÀ¸¹Ç·Î ¿¡·¯ ¹«½ÃÇÏ°í ÁøÇà ½Ãµµ, ¶Ç´Â unlink ÈÄ Àç»ı¼º
+        // ì´ë¯¸ ì¡´ì¬í•  ìˆ˜ ìˆìœ¼ë¯€ë¡œ ì—ëŸ¬ ë¬´ì‹œí•˜ê³  ì§„í–‰ ì‹œë„, ë˜ëŠ” unlink í›„ ì¬ìƒì„±
         // perror("mkfifo error"); 
     }
 
     printf("[Server] Server started (PID: %d). Waiting for clients...\n", getpid());
 
-    // 2. °ø¿ë FIFO ¿­±â
-    if ((public_fd = open(PUBLIC_FIFO, O_RDONLY)) == -1) {
+    // 2. ê³µìš© FIFO ì—´ê¸°
+    if ((public_fd = open(PUBLIC_FIFO, O_RDWR)) == -1) {
         perror("open error");
         exit(1);
     }
 
-    // 3. ¹«ÇÑ ·çÇÁ·Î ¸Ş½ÃÁö ´ë±â
+    // 3. ë¬´í•œ ë£¨í”„ë¡œ ë©”ì‹œì§€ ëŒ€ê¸°
     while (1) {
         if (read(public_fd, &msg, sizeof(Message)) > 0) {
             switch (msg.type) {
                 case MSG_CONNECT:
                     add_client(msg.pid);
-                    // ÀÔÀå ¾Ë¸² ºê·ÎµåÄ³½ºÆ® (¿É¼Ç)
+                    // ì…ì¥ ì•Œë¦¼ ë¸Œë¡œë“œìºìŠ¤íŠ¸ (ì˜µì…˜)
                     break;
 
                 case MSG_TEXT:
@@ -99,7 +99,7 @@ int main() {
                     break;
 
                 case MSG_FILE_DATA:
-                    // ÆÄÀÏ µ¥ÀÌÅÍµµ ±×´ë·Î Áß°è
+                    // íŒŒì¼ ë°ì´í„°ë„ ê·¸ëŒ€ë¡œ ì¤‘ê³„
                     broadcast_message(msg);
                     break;
 

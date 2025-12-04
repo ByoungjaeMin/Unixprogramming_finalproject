@@ -8,29 +8,30 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/mman.h> // Ch 9. 메모리 매핑
-#include <signal.h>   // Ch 8. 시그널
+#include <sys/mman.h> // Memory Mapping (mmap)
+#include <signal.h>   // Signal Handling
 
-// 상수 정의
+// Constants
 #define PUBLIC_FIFO "/tmp/public_fifo"
 #define MAX_MSG_LEN 256
 #define CLIENT_FIFO_TEMPLATE "/tmp/client_%d_fifo"
 
-// 메시지 타입 (일반 대화 vs 파일 전송)
+// Message Types
 typedef enum {
     MSG_CONNECT,
     MSG_TEXT,
     MSG_FILE_START,
     MSG_FILE_DATA,
-    MSG_DISCONNECT
+    MSG_DISCONNECT,
+    MSG_SERVER_SHUTDOWN // Server shutdown notification
 } MsgType;
 
-// 메시지 구조체 (통신 프로토콜)
+// Protocol Structure
 typedef struct {
-    pid_t pid;              // 보낸 프로세스 ID (식별자)
-    MsgType type;           // 메시지 종류
-    char data[MAX_MSG_LEN]; // 실제 데이터 (텍스트 또는 파일 청크)
-    int data_size;          // 데이터 크기
+    pid_t pid;              // Sender PID
+    MsgType type;           // Message type
+    char data[MAX_MSG_LEN]; // Payload (Text or File chunk)
+    int data_size;          // Actual data size
 } Message;
 
 #endif

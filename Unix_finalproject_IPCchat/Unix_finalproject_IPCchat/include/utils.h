@@ -2,13 +2,13 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-// 에러 처리 함수
+// Print error message and exit
 void error_handling(char *message);
 
-// 시그널 핸들러 설정 함수 (Ctrl+C 처리)
+// Setup signal handler (SIGINT)
 void setup_signal_handling();
 
-// 시그널 핸들러 본체 (필요시 직접 호출용)
+// Signal handler implementation
 void sigint_handler(int signo);
 
 #endif

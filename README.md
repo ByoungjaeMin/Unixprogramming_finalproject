@@ -1,78 +1,78 @@
-IPC-Based Local Chat and File Transfer System
+Unix Final Project: IPC Chat System
+1. Project Overview
+This project is a multi-client chat application developed for the Unix System Programming course. It demonstrates advanced system programming concepts including Inter-Process Communication (IPC) using Named Pipes (FIFO), I/O Multiplexing, Signal Handling, and Memory Mapped File I/O.
 
-final project for a Unix System Programming course. It implements a local network chat and file transfer system using FIFO (Named Pipes) and Memory Mapping (mmap), without relying on socket libraries. It demonstrates inter-process communication (IPC) techniques native to Unix systems.
+2. Key Features & Technologies
+IPC (Inter-Process Communication):
 
-Key Features
+Uses Named Pipes (FIFO) for bi-directional communication between the server and multiple clients.
 
-Multi-Client Chat
+Public FIFO for client requests and Private FIFOs for server responses.
 
-Supports simultaneous conversation among multiple users via a central server that broadcasts messages.
+I/O Multiplexing:
 
-Concurrency via Process Splitting
+The server utilizes select() to handle multiple client connections and administrator input simultaneously without blocking.
 
-The client uses fork() to separate message input (parent process) and message reception (child process).
+Advanced File Transfer:
 
-Allows receiving messages from others in real-time while typing.
+Implements Zero-copy file transfer using mmap() (Memory Mapping) for efficient reading and transmission of large files.
 
-High-Speed File Transfer
+Remote Shell Execution:
 
-Transfers files by mapping them into memory using mmap().
+Clients can execute shell commands on the server using /exec.
 
-Reduces disk I/O overhead and improves transfer efficiency compared to standard read/write operations.
+Implemented using popen() and pipe redirection to capture standard output.
 
-Handles large files reliably by splitting them into chunks.
+System Monitoring:
 
-Safe Termination (Signal Handling)
+Real-time server uptime and active user count monitoring.
 
-Intercepts SIGINT (Ctrl+C) to prevent immediate termination.
+Graceful Shutdown:
 
-Performs cleanup operations, such as unlinking FIFO files, before exiting to ensure no garbage files remain.
+Handles SIGINT (Ctrl+C) to safely close pipes and remove FIFO files, preventing zombie files.
 
-Development Environment and Technologies
+3. System Architecture
+Server: Central process that manages client logic, broadcasts messages, and handles system commands.
 
-Language: C
+Client: Forked process architecture.
 
-OS: Linux (Ubuntu recommended)
+Parent Process: Handles user input (Writer).
 
-Build System: Make
+Child Process: Handles message reception (Reader) to ensure asynchronous communication.
 
-Core Technologies:
+4. Build & Run
+Prerequisites
 
-IPC: mkfifo, open, read, write (Communication)
+GCC Compiler
 
-Process Management: fork, waitpid, exit (Multitasking)
+Make utility
 
-Memory Management: mmap, munmap (File Handling)
+Compilation
 
-Signal Handling: sigaction, signal (Exception Handling)
+Bash
+make
+Execution
 
-Installation and Build
+1. Start the Server:
 
-Open a terminal in the source code directory and run the following command:
+Bash
+./bin/server
+2. Start the Client(s): (Open a new terminal window)
 
-$ make
+Bash
+./bin/client
+5. Usage Commands
+Command	Description
+Normal Chat	Just type any text and press Enter to broadcast.
+/info	Displays server OS info, uptime, and current user count.
+/exec [cmd]	Executes a shell command on the server (e.g., /exec ls -l).
+/send [file]	Sends a file to all users (e.g., /send data.txt).
+/exit	Disconnects from the server and quits the program.
+6. File Structure
+src/: Source code (server.c, client.c, utils.c, file_handler.c)
 
-Upon successful compilation, the server and client executables will be created in the bin directory.
+include/: Header files (common.h, utils.h, file_handler.h)
 
-Usage
+bin/: Executables (generated after build)
 
-Run Server (Must be started first)
-The server creates a public FIFO and waits for client connections.
-
-$ ./bin/server
-
-Run Client (In a new terminal)
-Open a new terminal window to run a client. You can open multiple terminals to test multi-user chatting.
-
-$ ./bin/client
-
-Commands
-
-The following commands are available in the client chat window:
-
-Send Message: Type text and press Enter.
-
-Send File: /send [filepath]
-Example: /send data.txt
-
-Exit Program: Type /exit or press Ctrl+C.
+Makefile: Build scrip
